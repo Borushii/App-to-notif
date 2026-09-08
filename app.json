@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Rappels",
+    "slug": "App-to-notif",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "app-to-notif",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0E1015",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0E1015"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.borushii.apptonotif",
+      "infoPlist": {
+        "UIBackgroundModes": []
+      }
+    },
+    "android": {
+      "package": "com.borushii.apptonotif",
+      "adaptiveIcon": {
+        "backgroundColor": "#0E1015",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "color": "#6C8CFF",
+          "defaultChannel": "reminders"
+        }
+      ]
+    ]
+  }
+}
