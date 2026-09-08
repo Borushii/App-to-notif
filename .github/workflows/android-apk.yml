@@ -1,0 +1,81 @@
+name: APK Android
+
+on:
+  workflow_dispatch:
+    inputs:
+      architectures:
+        description: "ABI à compiler (arm64-v8a couvre les téléphones récents)"
+        required: false
+        default: "arm64-v8a,armeabi-v7a"
+  push:
+    branches:
+      - main
+      - "claude/**"
+    paths-ignore:
+      - "README.md"
+      - "**/*.md"
+
+jobs:
+  build:
+    name: Compiler l'APK de test
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Vérifier les types
+        run: npm run typecheck
+
+      - name: Lancer les tests
+        run: npm test
+
+      - name: Générer le projet natif
+        run: npx expo prebuild --platform android --no-install
+
+      # Compiler les quatre ABI double le temps de build sans servir sur un
+      # téléphone : arm64-v8a et armeabi-v7a couvrent tous les appareils réels.
+      - name: Limiter les ABI compilées
+        env:
+          ARCHITECTURES: ${{ inputs.architectures || 'arm64-v8a,armeabi-v7a' }}
+        run: |
+          sed -i "s|^reactNativeArchitectures=.*|reactNativeArchitectures=${ARCHITECTURES}|" android/gradle.properties
+          grep '^reactNativeArchitectures=' android/gradle.properties
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # L'APK release est signé avec le keystore de debug fourni par le modèle
+      # React Native : suffisant pour un test par installation manuelle, à
+      # remplacer par un keystore dédié avant toute publication.
+      - name: Compiler l'APK release
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Renommer l'APK
+        run: |
+          mkdir -p artefacts
+          cp android/app/build/outputs/apk/release/app-release.apk \
+             "artefacts/rappels-${GITHUB_SHA::7}.apk"
+          ls -lh artefacts/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rappels-apk
+          path: artefacts/*.apk
+          if-no-files-found: error
+          retention-days: 30

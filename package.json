@@ -8,6 +8,7 @@
     "expo": "~57.0.20",
     "expo-notifications": "~57.0.17",
     "expo-status-bar": "~57.0.1",
+    "expo-system-ui": "~57.0.3",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-safe-area-context": "~5.7.0"
@@ -23,7 +24,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "test": "node --test \"__tests__/**/*.test.ts\""
+    "test": "node --test \"__tests__/**/*.test.ts\"",
+    "apk": "expo prebuild --platform android --no-install --clean && cd android && ./gradlew assembleRelease"
   },
   "private": true
 }

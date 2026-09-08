@@ -42,6 +42,31 @@ npx expo run:android      # nécessite Android Studio
 npx expo run:ios          # nécessite macOS + Xcode
 ```
 
+### Obtenir un APK de test
+
+Le dépôt compile l'APK sur GitHub Actions (workflow **APK Android**), sans
+outillage local :
+
+1. Onglet **Actions** → workflow **APK Android** → **Run workflow**.
+2. À la fin du run, télécharger l'artefact **rappels-apk** (un `.zip`).
+3. Le décompresser et transférer le `.apk` sur le téléphone, puis l'installer
+   en autorisant les « sources inconnues » pour l'application qui ouvre le
+   fichier.
+
+Le workflow se déclenche aussi automatiquement à chaque push sur `main` ou sur
+une branche `claude/**`.
+
+L'APK est signé avec le **keystore de debug** du modèle React Native : c'est
+suffisant pour une installation manuelle de test, mais il faut un keystore
+dédié avant toute publication sur le Play Store.
+
+Pour compiler localement (nécessite Android Studio et un JDK 17) :
+
+```bash
+npm run apk
+# android/app/build/outputs/apk/release/app-release.apk
+```
+
 ### Vérifications
 
 ```bash
@@ -109,5 +134,11 @@ __tests__/schedule.test.ts   Tests de la logique de planification
 - Sur Android, certains constructeurs (Xiaomi, Huawei, Oppo…) restreignent
   agressivement les applications en arrière-plan ; il peut être nécessaire de
   désactiver l'optimisation de batterie pour l'application.
+- **Alarmes exactes (Android 12+)** — l'application déclare
+  `SCHEDULE_EXACT_ALARM`. Sans cette autorisation, `expo-notifications` bascule
+  sur des alarmes *inexactes* et le système peut retarder les rappels de
+  plusieurs minutes en veille. Sur Android 14+, l'autorisation n'est plus
+  accordée d'office : si les rappels dérivent, activez « Alarmes et rappels »
+  dans **Paramètres → Applications → Rappels**.
 - Dans Expo Go, les notifications locales fonctionnent, mais une *development
   build* reste plus fidèle au comportement final.
